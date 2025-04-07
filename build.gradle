@@ -89,6 +89,19 @@ minecraft {
         args << '-Dmixin.checks.interfaces=true'
         args << '-Dmixin.debug.export=true'
     }
+    
+    // Add GC optimization args to reduce lag spikes
+    args << '-XX:+UseG1GC'                   // Use G1 garbage collector (better for reducing pauses)
+    args << '-XX:+DisableExplicitGC'         // Prevent manual GC calls from causing lag spikes
+    args << '-XX:+UnlockExperimentalVMOptions' // Enable experimental VM options
+    args << '-XX:G1NewSizePercent=20'        // Allocate more memory for new generation
+    args << '-XX:G1ReservePercent=20'        // Reserve memory to reduce GC frequency
+    args << '-XX:MaxGCPauseMillis=5'        // Target a maximum 5ms pause time
+    args << '-XX:G1HeapRegionSize=32M'       // Larger regions for better performance
+    args << '-XX:+ParallelRefProcEnabled'    // Parallel reference processing
+    args << '-XX:G1MixedGCLiveThresholdPercent=90' // Only collect old regions that are 90% garbage
+    args << '-XX:G1RSetUpdatingPauseTimePercent=5' // Reduce remembered set update time
+    
     extraRunJvmArguments.addAll(args)
     extraRunJvmArguments.addAll(propertyStringList('extra_jvm_args'))
 
@@ -191,7 +204,10 @@ processResources {
     inputs.property 'mixin_configs', propertyStringList('mixin_configs').join(' ')
 
     def filterList = ['mcmod.info', 'pack.mcmeta']
-    filterList.addAll(propertyStringList('mixin_configs').collect(config -> "mixins.${config}.json" as String))
+    def configs = propertyStringList('mixin_configs')
+    configs.each { config ->
+        filterList.add("mixins.${config}.json".toString())
+    }
 
     filesMatching(filterList) { fcd ->
         fcd.expand(
@@ -300,7 +316,7 @@ String parserChangelog() {
 
 tasks.register('generateMixinJson') {
     group 'cleanroom helpers'
-    def missingConfig = propertyStringList('mixin_configs').findAll(config -> !file("src/main/resources/mixins.${config}.json").exists())
+    def missingConfig = propertyStringList('mixin_configs').findAll { config -> !file("src/main/resources/mixins.${config}.json").exists() }
     onlyIf {
         if (propertyBool('use_mixins') && propertyBool('generate_mixins_json')) {
             return !missingConfig.empty
