@@ -1,0 +1,28 @@
+name: Neonium
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Neonium
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build the mod
+        run: ./gradlew --no-daemon build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Neonium
+          path: build/libs
