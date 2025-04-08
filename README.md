@@ -5,7 +5,7 @@
 ![GitHub Forks](https://img.shields.io/github/forks/NeoX2025Gaming/Neonium?style=flat-square)
 ![Build Status](https://img.shields.io/github/actions/workflow/status/NeoX2025Gaming/Neonium/build.yml?branch=master&style=flat-square)
 
-Neonium is a fork of Vintagium by Asek3 which itself is a fork of Sodium for Forge 1.12.2 by CaffeineMC.
+Neonium is a fork of [Vintagium by Asek3](https://github.com/Asek3/sodium-1.12), which itself is a fork of [CaffeineMC's "Sodium"](https://github.com/CaffeineMC/sodium), ported to Minecraft 1.12.2 and designed to work with Forge Mod Loader.
 
 The main goal of Neonium is to provide the best performance improvements possible for Minecraft 1.12.2 while maintaining compatibility with other mods.
 
@@ -25,12 +25,7 @@ Join our growing community of mod enthusiasts and contributors:
 - [Pull Requests](https://github.com/NeoX2025Gaming/Neonium/pulls) – Submit code improvements.
 
 ## 📜 License
-Neonium is licensed under the LGPLv3 License. See the [LICENSE](LICENSE) file for more information.
+Neonium is licensed under the LGPLv3 License. For more information, see the [LICENSE](LICENSE) file.
 
 ---
 Thank you for supporting Neonium! Your contributions and feedback are invaluable in making this mod even better! 💖
-
-## 💻 Contributing
-
-- [Issues](https://github.com/NeoX2025Gaming/Neonium/issues) – Report bugs or request features.
-- [Pull Requests](https://github.com/NeoX2025Gaming/Neonium/pulls) – Submit code improvements.
