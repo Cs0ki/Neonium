@@ -26,7 +26,19 @@ void main() {
     vec3 pos = (a_Pos * u_ModelScale) + d_ModelOffset.xyz;
 
 #ifdef USE_FOG
-    v_FragDistance = length(pos);
+    // Adjust position for fog calculations
+    vec3 fogPos = pos;
+    
+    // For lava fog - raise the origin point to approximate player head level
+    // This makes lava fog originate from player's head level instead of feet
+    if (fogPos.y > 0.0) {
+        // Only adjust for blocks above the player to maintain the correct fog effect
+        fogPos.y = max(0.0, fogPos.y - 1.6); // 1.6 blocks is approximately player height
+    }
+    
+    // Calculate the fog distance - for water we want a more accurate distance
+    // that doesn't fade out as aggressively for nearby blocks
+    v_FragDistance = length(fogPos);
 #endif
 
     // Transform the vertex position into model-view-projection space

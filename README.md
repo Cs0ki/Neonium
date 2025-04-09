@@ -12,15 +12,15 @@ The main goal of Neonium is to provide the best performance improvements possibl
 ## 📢 Disclaimer
 Known incompatibilities:
 - Optifine (Neonium is not and will never be compatible with Optifine)
-- FarPlaneTwo
+- FarPlaneTwo (Neonium will not have any support for FarPlaneTwo)
 - LittleTiles
 - Fluidlogged API (and other mods that use this API, such as Subaquatic)
 - ArchitectureCraft
 
 Due to limited time, feature requests are best made through pull requests. I'll review them as soon as possible.
 
-## 🌍 Community
-Join our growing community of mod enthusiasts and contributors:
+## 💻 Contributing
+
 - [Issues](https://github.com/NeoX2025Gaming/Neonium/issues) – Report bugs or request features.
 - [Pull Requests](https://github.com/NeoX2025Gaming/Neonium/pulls) – Submit code improvements.
 
@@ -28,4 +28,4 @@ Join our growing community of mod enthusiasts and contributors:
 Neonium is licensed under the LGPLv3 License. For more information, see the [LICENSE](LICENSE) file.
 
 ---
-Thank you for supporting Neonium! Your contributions and feedback are invaluable in making this mod even better! 💖
+Thank you for supporting Neonium! 💖

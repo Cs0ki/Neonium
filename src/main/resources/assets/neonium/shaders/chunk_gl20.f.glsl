@@ -18,6 +18,22 @@ uniform float u_FogDensity;
 // e^(-density * c^2)
 float getFogFactor() {
     float dist = v_FragDistance * u_FogDensity;
+    
+    // Improved water fog calculation to match vanilla behavior
+    // Vanilla water has a higher visibility range, especially for nearby blocks
+    // This creates a more gradual fog effect in water
+    bool isWaterFog = u_FogColor.b > 0.2 && u_FogColor.r < 0.2 && u_FogColor.g < 0.4;
+    if (isWaterFog) {
+        // Scale the distance to match vanilla water visibility
+        // This makes water less dark when close but maintains fog for distance
+        dist *= 0.5; // Reduced density for water to see farther
+        
+        // Apply a more linear falloff for water - based on vanilla behavior
+        if (dist < 1.5) {
+            return 1.0 - (dist * 0.25); // More transparent for close blocks
+        }
+    }
+    
     return 1.0 / exp2(dist * dist);
 }
 #endif
@@ -28,7 +44,16 @@ uniform float u_FogEnd;
 
 // (end - dist) / (end - start)
 float getFogFactor() {
-    return (u_FogEnd - v_FragDistance) / u_FogLength;
+    float dist = v_FragDistance;
+    
+    // Improved water fog calculation to match vanilla behavior
+    bool isWaterFog = u_FogColor.b > 0.2 && u_FogColor.r < 0.2 && u_FogColor.g < 0.4;
+    if (isWaterFog) {
+        // Increase the fog end distance for water to match vanilla
+        return clamp((u_FogEnd * 1.8 - dist) / (u_FogLength * 1.8), 0.0, 1.0);
+    }
+    
+    return (u_FogEnd - dist) / u_FogLength;
 }
 #endif
 
