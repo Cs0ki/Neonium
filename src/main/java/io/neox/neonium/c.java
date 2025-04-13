@@ -1,0 +1,1 @@
+@net.minecraftforge.fml.common.Mod(modid="vintagium")public class c{}

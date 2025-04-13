@@ -2,9 +2,8 @@ name: Feature Request
 description: >
   What features are you wanting to request?
   
-  Please note that features that would be out-of-scope for Neonium, such as
-  those which would significantly impact vanilla behavior (i.e. gameplay
-  changes), will be automatically closed.
+  Note that features that would be out-of-scope for Neonium, such as
+  those which impact vanilla behavior, will be automatically closed.
 body:
   - type: markdown
     attributes:
