@@ -38,8 +38,13 @@ public class MixinBakedQuad implements ModelQuadView {
     @Inject(method = "<init>([IILnet/minecraft/util/EnumFacing;Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;ZLnet/minecraft/client/renderer/vertex/VertexFormat;)V", at = @At("RETURN"))
     private void init(int[] vertexData, int colorIndex, EnumFacing face, TextureAtlasSprite sprite, boolean shade, VertexFormat format, CallbackInfo ci) {
         this.formatDescription = VertexFormatDescription.get(format);
-        if(!UnpackedBakedQuad.class.isAssignableFrom(this.getClass())) {
-            this.cachedFlags = ModelQuadFlags.getQuadFlags((BakedQuad) (Object) this);
+        try {
+            if(!UnpackedBakedQuad.class.isAssignableFrom(this.getClass())) {
+                this.cachedFlags = ModelQuadFlags.getQuadFlags((BakedQuad) (Object) this);
+            }
+        } catch (Exception e) {
+            // Safely handle any errors during flag calculation
+            this.cachedFlags = 0;
         }
     }
 
@@ -49,38 +54,98 @@ public class MixinBakedQuad implements ModelQuadView {
 
     @Override
     public float getX(int idx) {
-        int positionIndex = this.formatDescription.getIndex(VertexFormatDescription.Element.POSITION);
-        if (positionIndex == -1) {
+        try {
+            int[] vertexData = this.getVertexData();
+            if (vertexData == null || vertexData.length == 0) {
+                return 0;
+            }
+            
+            int positionIndex = this.formatDescription != null ? this.formatDescription.getIndex(VertexFormatDescription.Element.POSITION) : -1;
+            if (positionIndex == -1) {
+                return 0;
+            }
+            
+            int offset = vertexOffset(idx) + positionIndex;
+            if (offset < 0 || offset >= vertexData.length) {
+                return 0;
+            }
+            
+            return Float.intBitsToFloat(vertexData[offset]);
+        } catch (Exception e) {
             return 0;
         }
-        return Float.intBitsToFloat(this.getVertexData()[vertexOffset(idx) + positionIndex]);
     }
 
     @Override
     public float getY(int idx) {
-        int positionIndex = this.formatDescription.getIndex(VertexFormatDescription.Element.POSITION);
-        if (positionIndex == -1) {
+        try {
+            int[] vertexData = this.getVertexData();
+            if (vertexData == null || vertexData.length == 0) {
+                return 0;
+            }
+            
+            int positionIndex = this.formatDescription != null ? this.formatDescription.getIndex(VertexFormatDescription.Element.POSITION) : -1;
+            if (positionIndex == -1) {
+                return 0;
+            }
+            
+            int offset = vertexOffset(idx) + positionIndex + 1;
+            if (offset < 0 || offset >= vertexData.length) {
+                return 0;
+            }
+            
+            return Float.intBitsToFloat(vertexData[offset]);
+        } catch (Exception e) {
             return 0;
         }
-        return Float.intBitsToFloat(this.getVertexData()[vertexOffset(idx) + positionIndex + 1]);
     }
 
     @Override
     public float getZ(int idx) {
-        int positionIndex = this.formatDescription.getIndex(VertexFormatDescription.Element.POSITION);
-        if (positionIndex == -1) {
+        try {
+            int[] vertexData = this.getVertexData();
+            if (vertexData == null || vertexData.length == 0) {
+                return 0;
+            }
+            
+            int positionIndex = this.formatDescription != null ? this.formatDescription.getIndex(VertexFormatDescription.Element.POSITION) : -1;
+            if (positionIndex == -1) {
+                return 0;
+            }
+            
+            int offset = vertexOffset(idx) + positionIndex + 2;
+            if (offset < 0 || offset >= vertexData.length) {
+                return 0;
+            }
+            
+            return Float.intBitsToFloat(vertexData[offset]);
+        } catch (Exception e) {
             return 0;
         }
-        return Float.intBitsToFloat(this.getVertexData()[vertexOffset(idx) + positionIndex + 2]);
     }
 
     @Override
     public int getColor(int idx) {
-        int colorIndex = this.formatDescription.getIndex(VertexFormatDescription.Element.COLOR);
-        if (colorIndex == -1) {
+        try {
+            int[] vertexData = this.getVertexData();
+            if (vertexData == null || vertexData.length == 0) {
+                return 0;
+            }
+            
+            int colorIndex = this.formatDescription != null ? this.formatDescription.getIndex(VertexFormatDescription.Element.COLOR) : -1;
+            if (colorIndex == -1) {
+                return 0;
+            }
+            
+            int offset = vertexOffset(idx) + colorIndex;
+            if (offset < 0 || offset >= vertexData.length) {
+                return 0;
+            }
+            
+            return vertexData[offset];
+        } catch (Exception e) {
             return 0;
         }
-        return this.getVertexData()[vertexOffset(idx) + colorIndex];
     }
 
     @Override
@@ -90,20 +155,50 @@ public class MixinBakedQuad implements ModelQuadView {
 
     @Override
     public float getTexU(int idx) {
-        int textureIndex = this.formatDescription.getIndex(VertexFormatDescription.Element.TEXTURE);
-        if (textureIndex == -1) {
+        try {
+            int[] vertexData = this.getVertexData();
+            if (vertexData == null || vertexData.length == 0) {
+                return 0;
+            }
+            
+            int textureIndex = this.formatDescription != null ? this.formatDescription.getIndex(VertexFormatDescription.Element.TEXTURE) : -1;
+            if (textureIndex == -1) {
+                return 0;
+            }
+            
+            int offset = vertexOffset(idx) + textureIndex;
+            if (offset < 0 || offset >= vertexData.length) {
+                return 0;
+            }
+            
+            return Float.intBitsToFloat(vertexData[offset]);
+        } catch (Exception e) {
             return 0;
         }
-        return Float.intBitsToFloat(this.getVertexData()[vertexOffset(idx) + textureIndex]);
     }
 
     @Override
     public float getTexV(int idx) {
-        int textureIndex = this.formatDescription.getIndex(VertexFormatDescription.Element.TEXTURE);
-        if (textureIndex == -1) {
+        try {
+            int[] vertexData = this.getVertexData();
+            if (vertexData == null || vertexData.length == 0) {
+                return 0;
+            }
+            
+            int textureIndex = this.formatDescription != null ? this.formatDescription.getIndex(VertexFormatDescription.Element.TEXTURE) : -1;
+            if (textureIndex == -1) {
+                return 0;
+            }
+            
+            int offset = vertexOffset(idx) + textureIndex + 1;
+            if (offset < 0 || offset >= vertexData.length) {
+                return 0;
+            }
+            
+            return Float.intBitsToFloat(vertexData[offset]);
+        } catch (Exception e) {
             return 0;
         }
-        return Float.intBitsToFloat(this.getVertexData()[vertexOffset(idx) + textureIndex + 1]);
     }
 
     @Override
@@ -113,11 +208,26 @@ public class MixinBakedQuad implements ModelQuadView {
 
     @Override
     public int getNormal(int idx) {
-        int normalIndex = this.formatDescription.getIndex(VertexFormatDescription.Element.NORMAL);
-        if (normalIndex == -1) {
+        try {
+            int[] vertexData = this.getVertexData();
+            if (vertexData == null || vertexData.length == 0) {
+                return 0;
+            }
+            
+            int normalIndex = this.formatDescription != null ? this.formatDescription.getIndex(VertexFormatDescription.Element.NORMAL) : -1;
+            if (normalIndex == -1) {
+                return 0;
+            }
+            
+            int offset = vertexOffset(idx) + normalIndex;
+            if (offset < 0 || offset >= vertexData.length) {
+                return 0;
+            }
+            
+            return vertexData[offset];
+        } catch (Exception e) {
             return 0;
         }
-        return this.getVertexData()[vertexOffset(idx) + normalIndex];
     }
 
     @Override

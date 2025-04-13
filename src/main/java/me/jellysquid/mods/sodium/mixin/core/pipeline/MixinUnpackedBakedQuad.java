@@ -13,6 +13,11 @@ public class MixinUnpackedBakedQuad {
     protected int cachedFlags;
     @Inject(method = "<init>", at = @At("RETURN"))
     private void calculateFlags(CallbackInfo ci) {
-        this.cachedFlags = ModelQuadFlags.getQuadFlags((BakedQuad) (Object) this);
+        try {
+            this.cachedFlags = ModelQuadFlags.getQuadFlags((BakedQuad) (Object) this);
+        } catch (Exception e) {
+            // Safely handle any errors during flag calculation
+            this.cachedFlags = 0;
+        }
     }
 }

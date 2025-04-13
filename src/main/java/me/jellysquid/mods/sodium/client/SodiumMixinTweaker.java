@@ -1,6 +1,8 @@
 package me.jellysquid.mods.sodium.client;
 
 import com.google.common.collect.ImmutableList;
+import io.neox.neonium.VeryEarlyModDetector;
+import me.jellysquid.mods.sodium.common.config.EarlyModDetection;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import zone.rong.mixinbooter.IEarlyMixinLoader;
 
@@ -14,6 +16,20 @@ public class SodiumMixinTweaker implements IFMLLoadingPlugin, IEarlyMixinLoader 
     private static final List<String> MIXINS = ImmutableList.of(
             "mixins.neonium.json"
     );
+    
+    static {
+        // Run early detection as soon as this class is loaded
+        try {
+            boolean isLittleTilesPresent = VeryEarlyModDetector.isLittleTilesPresent();
+            System.out.println("[Neonium] Early LittleTiles detection result: " + isLittleTilesPresent);
+            
+            // Initialize our early detection system with the result
+            EarlyModDetection.setLittleTilesPresent(isLittleTilesPresent);
+        } catch (Throwable t) {
+            System.err.println("[Neonium] Error during early mod detection: " + t.getMessage());
+            t.printStackTrace();
+        }
+    }
 
     @Override
     public List<String> getMixinConfigs() {
@@ -38,7 +54,13 @@ public class SodiumMixinTweaker implements IFMLLoadingPlugin, IEarlyMixinLoader 
 
     @Override
     public void injectData(Map<String, Object> data) {
-
+        // Run detection again to be sure
+        try {
+            boolean isLittleTilesPresent = VeryEarlyModDetector.isLittleTilesPresent();
+            EarlyModDetection.setLittleTilesPresent(isLittleTilesPresent);
+        } catch (Throwable t) {
+            System.err.println("[Neonium] Error during mod detection in injectData: " + t.getMessage());
+        }
     }
 
     @Override
