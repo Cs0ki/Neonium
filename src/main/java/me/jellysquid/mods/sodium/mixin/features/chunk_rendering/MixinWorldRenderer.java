@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.mixin.features.chunk_rendering;
 
-import io.neox.neonium.LittleTilesCompat;
 import me.jellysquid.mods.sodium.client.gl.device.RenderDevice;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import net.minecraft.client.Minecraft;
@@ -40,10 +39,6 @@ public abstract class MixinWorldRenderer {
 
     @Redirect(method = "loadRenderers", at = @At(value = "FIELD", target = "Lnet/minecraft/client/settings/GameSettings;renderDistanceChunks:I", ordinal = 1))
     private int nullifyBuiltChunkStorage(GameSettings settings) {
-        // Skip custom chunk rendering if LittleTiles is loaded
-        if (LittleTilesCompat.isLittleTilesLoaded()) {
-            return settings.renderDistanceChunks; // Use vanilla's rendering
-        }
         // Do not allow any resources to be allocated
         return 0;
     }
@@ -55,11 +50,6 @@ public abstract class MixinWorldRenderer {
 
     @Inject(method = "setWorldAndLoadRenderers", at = @At("RETURN"))
     private void onWorldChanged(WorldClient world, CallbackInfo ci) {
-        // Skip if LittleTiles is loaded
-        if (LittleTilesCompat.isLittleTilesLoaded()) {
-            return;
-        }
-        
         RenderDevice.enterManagedCode();
 
         try {
@@ -75,10 +65,6 @@ public abstract class MixinWorldRenderer {
      */
     @Overwrite
     public int getRenderedChunks() {
-        // Use vanilla behavior if LittleTiles is loaded
-        if (LittleTilesCompat.isLittleTilesLoaded()) {
-            return 0; // This is a reasonable default, as vanilla code will be used
-        }
         return this.renderer.getVisibleChunkCount();
     }
 
@@ -88,19 +74,11 @@ public abstract class MixinWorldRenderer {
      */
     @Overwrite
     public boolean hasNoChunkUpdates() {
-        // Use vanilla behavior if LittleTiles is loaded
-        if (LittleTilesCompat.isLittleTilesLoaded()) {
-            return true; // This ensures vanilla renderers function properly
-        }
         return this.renderer.isTerrainRenderComplete();
     }
 
     @Inject(method = "setDisplayListEntitiesDirty", at = @At("RETURN"))
     private void onTerrainUpdateScheduled(CallbackInfo ci) {
-        // Skip if LittleTiles is loaded
-        if (LittleTilesCompat.isLittleTilesLoaded()) {
-            return;
-        }
         this.renderer.scheduleTerrainUpdate();
     }
 
@@ -110,12 +88,6 @@ public abstract class MixinWorldRenderer {
      */
     @Overwrite
     public int renderBlockLayer(BlockRenderLayer blockLayerIn, double partialTicks, int pass, Entity entityIn) {
-        // Use vanilla rendering if LittleTiles is loaded
-        if (LittleTilesCompat.isLittleTilesLoaded()) {
-            this.renderBlockLayer(blockLayerIn);
-            return 0;
-        }
-        
         RenderDevice.enterManagedCode();
 
         RenderHelper.disableStandardItemLighting();
@@ -147,12 +119,6 @@ public abstract class MixinWorldRenderer {
      */
     @Overwrite
     public void setupTerrain(Entity entity, double tick, ICamera camera, int frame, boolean spectator) {
-        // Use vanilla rendering if LittleTiles is loaded
-        if (LittleTilesCompat.isLittleTilesLoaded()) {
-            // Let vanilla handle it by skipping our custom implementation
-            return;
-        }
-        
         RenderDevice.enterManagedCode();
 
         boolean hasForcedFrustum = false;
@@ -169,10 +135,6 @@ public abstract class MixinWorldRenderer {
      */
     @Overwrite
     private void markBlocksForUpdate(int minX, int minY, int minZ, int maxX, int maxY, int maxZ, boolean important) {
-        // Skip if LittleTiles is loaded, let vanilla handle it
-        if (LittleTilesCompat.isLittleTilesLoaded()) {
-            return;
-        }
         this.renderer.scheduleRebuildForBlockArea(minX, minY, minZ, maxX, maxY, maxZ, important);
     }
 
@@ -180,29 +142,16 @@ public abstract class MixinWorldRenderer {
     // flags
     @Redirect(method = "updateClouds", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher;hasNoFreeRenderBuilders()Z"))
     private boolean alwaysHaveBuilders(ChunkRenderDispatcher instance) {
-        // Skip if LittleTiles is loaded
-        if (LittleTilesCompat.isLittleTilesLoaded()) {
-            return instance.hasNoFreeRenderBuilders();
-        }
         return false;
     }
 
     @Redirect(method = "updateClouds", at = @At(value = "INVOKE", target = "Ljava/util/Set;isEmpty()Z", ordinal = 1))
     private boolean alwaysHaveNoTasks(Set instance) {
-        // Skip if LittleTiles is loaded
-        if (LittleTilesCompat.isLittleTilesLoaded()) {
-            return instance.isEmpty();
-        }
         return true;
     }
 
     @Inject(method = "loadRenderers", at = @At("RETURN"))
     private void onReload(CallbackInfo ci) {
-        // Skip if LittleTiles is loaded
-        if (LittleTilesCompat.isLittleTilesLoaded()) {
-            return;
-        }
-        
         RenderDevice.enterManagedCode();
 
         try {
@@ -214,11 +163,6 @@ public abstract class MixinWorldRenderer {
 
     @Inject(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderHelper;enableStandardItemLighting()V", shift = At.Shift.AFTER, ordinal = 1), cancellable = true)
     public void sodium$renderTileEntities(Entity entity, ICamera camera, float partialTicks, CallbackInfo ci) {
-        // Skip if LittleTiles is loaded
-        if (LittleTilesCompat.isLittleTilesLoaded()) {
-            return;
-        }
-        
         this.renderer.renderTileEntities(partialTicks, damagedBlocks);
 
         this.mc.entityRenderer.disableLightmap();
@@ -232,10 +176,6 @@ public abstract class MixinWorldRenderer {
      */
     @Overwrite
     public String getDebugInfoRenders() {
-        // Use vanilla behavior if LittleTiles is loaded
-        if (LittleTilesCompat.isLittleTilesLoaded()) {
-            return ""; // Default to empty string, vanilla will handle debug info
-        }
         return this.renderer.getChunksDebugString();
     }
 }

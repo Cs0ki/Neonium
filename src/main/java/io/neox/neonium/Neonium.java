@@ -16,7 +16,7 @@ import java.io.File;
 public class Neonium {
     public static final String MODID = "neonium";
     public static final String MODNAME = "Neonium";
-    public static final String VERSION = "1.1.1";
+    public static final String VERSION = "1.1.2";
     public static final String MOD_VERSION = VERSION;
 
     private static SodiumGameOptions CONFIG;

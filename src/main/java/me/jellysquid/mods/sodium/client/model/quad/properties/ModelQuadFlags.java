@@ -33,119 +33,104 @@ public class ModelQuadFlags {
      * certain optimizations.
      */
     public static int getQuadFlags(BakedQuad bakedQuad) {
-        try {
-            if (bakedQuad == null) {
-                return 0;
-            }
-            
-            ModelQuadView quad = (ModelQuadView) bakedQuad;
-            EnumFacing face = bakedQuad.getFace();
-    
-            if (face == null) {
-                return 0;
-            }
-    
-            float minX = 32.0F;
-            float minY = 32.0F;
-            float minZ = 32.0F;
-    
-            float maxX = -32.0F;
-            float maxY = -32.0F;
-            float maxZ = -32.0F;
-    
-            // Safely handle vertex data
-            try {
-                // TODO
-                int numVertices = 4/*Math.min(4, bakedQuad.getVertexData().length / 8)*/;
-                for (int i = 0; i < numVertices; ++i) {
-                    float x = quad.getX(i);
-                    float y = quad.getY(i);
-                    float z = quad.getZ(i);
-        
-                    minX = Math.min(minX, x);
-                    minY = Math.min(minY, y);
-                    minZ = Math.min(minZ, z);
-                    maxX = Math.max(maxX, x);
-                    maxY = Math.max(maxY, y);
-                    maxZ = Math.max(maxZ, z);
-                }
-            } catch (Exception e) {
-                // If we can't get vertex data, return 0 (no flags)
-                return 0;
-            }
-    
-            boolean partial = false;
-            
-            switch (face.getAxis()) {
-                case X : 
-                	partial = minY >= 0.0001f || minZ >= 0.0001f || maxY <= 0.9999F || maxZ <= 0.9999F;
-                	break;
-                case Y : 
-                	partial = minX >= 0.0001f || minZ >= 0.0001f || maxX <= 0.9999F || maxZ <= 0.9999F;
-                	break;
-                case Z : 
-                	partial = minX >= 0.0001f || minY >= 0.0001f || maxX <= 0.9999F || maxY <= 0.9999F;
-                	break;
-            };
-    
-            boolean parallel = false;
-            
-            switch(face.getAxis()) {
-                case X :
-                	parallel = minX == maxX;
-                	break;
-                case Y :
-                	parallel = minY == maxY;
-                	break;
-                case Z :
-                	parallel = minZ == maxZ;
-                	break;
-            };
-    
-            boolean aligned = false;
-            boolean flag = false;
-            
-            switch (face) {
-                case DOWN :
-                	flag = minY < 0.0001f;
-                	break;
-                case UP :
-                	flag = maxY > 0.9999F;
-                	break;
-                case NORTH :
-                	flag = minZ < 0.0001f;
-                	break;
-                case SOUTH :
-                	flag = maxZ > 0.9999F;
-                	break;
-                case WEST :
-                	flag = minX < 0.0001f;
-                	break;
-                case EAST :
-                	flag = maxX > 0.9999F;
-                	break;
-            };
-            
-            aligned = parallel && flag;
-    
-            int flags = 0;
-    
-            if (partial) {
-                flags |= IS_PARTIAL;
-            }
-    
-            if (parallel) {
-                flags |= IS_PARALLEL;
-            }
-    
-            if (aligned) {
-                flags |= IS_ALIGNED;
-            }
-    
-            return flags;
-        } catch (Exception e) {
-            // Failsafe - return 0 for any unexpected exception
+        ModelQuadView quad = (ModelQuadView) bakedQuad;
+        EnumFacing face = bakedQuad.getFace();
+
+        if (face == null) {
             return 0;
         }
+
+        float minX = 32.0F;
+        float minY = 32.0F;
+        float minZ = 32.0F;
+
+        float maxX = -32.0F;
+        float maxY = -32.0F;
+        float maxZ = -32.0F;
+
+        // TODO
+        int numVertices = 4/*Math.min(4, bakedQuad.getVertexData().length / 8)*/;
+        for (int i = 0; i < numVertices; ++i) {
+            float x = quad.getX(i);
+            float y = quad.getY(i);
+            float z = quad.getZ(i);
+
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            minZ = Math.min(minZ, z);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+            maxZ = Math.max(maxZ, z);
+        }
+
+        boolean partial = false;
+        
+        switch (face.getAxis()) {
+            case X : 
+            	partial = minY >= 0.0001f || minZ >= 0.0001f || maxY <= 0.9999F || maxZ <= 0.9999F;
+            	break;
+            case Y : 
+            	partial = minX >= 0.0001f || minZ >= 0.0001f || maxX <= 0.9999F || maxZ <= 0.9999F;
+            	break;
+            case Z : 
+            	partial = minX >= 0.0001f || minY >= 0.0001f || maxX <= 0.9999F || maxY <= 0.9999F;
+            	break;
+        };
+
+        boolean parallel = false;
+        
+        switch(face.getAxis()) {
+            case X :
+            	parallel = minX == maxX;
+            	break;
+            case Y :
+            	parallel = minY == maxY;
+            	break;
+            case Z :
+            	parallel = minZ == maxZ;
+            	break;
+        };
+
+        boolean aligned = false;
+        boolean flag = false;
+        
+        switch (face) {
+            case DOWN :
+            	flag = minY < 0.0001f;
+            	break;
+            case UP :
+            	flag = maxY > 0.9999F;
+            	break;
+            case NORTH :
+            	flag = minZ < 0.0001f;
+            	break;
+            case SOUTH :
+            	flag = maxZ > 0.9999F;
+            	break;
+            case WEST :
+            	flag = minX < 0.0001f;
+            	break;
+            case EAST :
+            	flag = maxX > 0.9999F;
+            	break;
+        };
+        
+        aligned = parallel && flag;
+
+        int flags = 0;
+
+        if (partial) {
+            flags |= IS_PARTIAL;
+        }
+
+        if (parallel) {
+            flags |= IS_PARALLEL;
+        }
+
+        if (aligned) {
+            flags |= IS_ALIGNED;
+        }
+
+        return flags;
     }
 }

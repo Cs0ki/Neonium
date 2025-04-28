@@ -1,7 +1,6 @@
 package me.jellysquid.mods.sodium.mixin.features.chunk_rendering;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import io.neox.neonium.LittleTilesCompat;
 import io.neox.neonium.Neonium;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import net.minecraft.client.Minecraft;
@@ -39,7 +38,7 @@ public abstract class MixinRenderGlobal {
      * @author embeddedt
      * @reason reimplement entity render loop because vanilla's relies on the renderInfos list
      */
-    @Inject(method = "renderEntities", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderGlobal;renderInfos:Ljava/util/List;", ordinal = 0), cancellable = true)
+    @Inject(method = "renderEntities", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderGlobal;renderInfos:Ljava/util/List;", ordinal = 0))
     private void renderEntities(Entity renderViewEntity, ICamera camera, float partialTicks, CallbackInfo ci,
                                 @Local(ordinal = 0) List<Entity> loadedEntityList,
                                 @Local(ordinal = 1) List<Entity> outlineEntityList,
@@ -47,11 +46,6 @@ public abstract class MixinRenderGlobal {
                                 @Local(ordinal = 0) double renderViewX,
                                 @Local(ordinal = 1) double renderViewY,
                                 @Local(ordinal = 2) double renderViewZ) {
-        // If LittleTiles is loaded, skip our custom implementation to avoid compatibility issues
-        if (LittleTilesCompat.isLittleTilesLoaded()) {
-            return;
-        }
-                                
         int pass = net.minecraftforge.client.MinecraftForgeClient.getRenderPass();
         EntityPlayerSP player = this.mc.player;
         BlockPos.MutableBlockPos entityBlockPos = new BlockPos.MutableBlockPos();
@@ -91,8 +85,5 @@ public abstract class MixinRenderGlobal {
                 }
             }
         }
-        
-        // Skip the original method since we've handled the entity rendering
-        ci.cancel();
     }
 }

@@ -20,18 +20,10 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
     
     // List of mixins to disable for LittleTiles compatibility
     private static final String[] LITTLETILES_PROBLEM_MIXINS = {
-        // Core rendering mixins that conflict with LittleTiles
         "me.jellysquid.mods.sodium.mixin.features.chunk_rendering.MixinRenderGlobal",
         "me.jellysquid.mods.sodium.mixin.features.particle.cull.MixinParticleManager",
         "me.jellysquid.mods.sodium.mixin.features.chunk_rendering.MixinWorldRenderer",
-        
-        // Additional chunk-related mixins that may interfere with rendering
-        "me.jellysquid.mods.sodium.mixin.features.chunk_rendering.MixinClientWorld",
-        "me.jellysquid.mods.sodium.mixin.features.chunk_rendering.MixinChunkBuilder",
-        
-        // Other mixins that might affect chunk visibility/loading
-        "me.jellysquid.mods.sodium.mixin.features.options.MixinGameOptions",
-        "me.jellysquid.mods.sodium.mixin.features.render.MixinWorldRenderer"
+        "me.jellysquid.mods.sodium.mixin.features.chunk_rendering.MixinChunkBuilder"
     };
 
     private final Logger logger = LogManager.getLogger(Neonium.MODNAME);

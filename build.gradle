@@ -86,16 +86,12 @@ minecraft {
     }
     
     // Add GC optimization args to reduce lag spikes
-    args << '-XX:+UseG1GC'                   // Use G1 garbage collector (better for reducing pauses)
-    args << '-XX:+DisableExplicitGC'         // Prevent manual GC calls from causing lag spikes
-    args << '-XX:+UnlockExperimentalVMOptions' // Enable experimental VM options
-    args << '-XX:G1NewSizePercent=20'        // Allocate more memory for new generation
-    args << '-XX:G1ReservePercent=20'        // Reserve memory to reduce GC frequency
-    args << '-XX:MaxGCPauseMillis=5'        // Target a maximum 5ms pause time
-    args << '-XX:G1HeapRegionSize=32M'       // Larger regions for better performance
-    args << '-XX:+ParallelRefProcEnabled'    // Parallel reference processing
-    args << '-XX:G1MixedGCLiveThresholdPercent=90' // Only collect old regions that are 90% garbage
-    args << '-XX:G1RSetUpdatingPauseTimePercent=5' // Reduce remembered set update time
+    args << '-XX:+UseG1GC'                      // Use G1 garbage collector (better for reducing pauses)
+    args << '-XX:+DisableExplicitGC'            // Prevent manual GC calls from causing lag spikes
+    args << '-XX:+UnlockExperimentalVMOptions'  // Enable experimental VM options
+    args << '-XX:G1NewSizePercent=20'           // Allocate more memory for new generation
+    args << '-XX:G1ReservePercent=20'           // Reserve memory to reduce GC frequency
+    args << '-XX:G1HeapRegionSize=32M'          // Larger regions for better performance
     
     extraRunJvmArguments.addAll(args)
     extraRunJvmArguments.addAll(propertyStringList('extra_jvm_args'))

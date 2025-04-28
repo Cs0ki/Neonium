@@ -1,7 +1,6 @@
 package me.jellysquid.mods.sodium.mixin.features.particle.cull;
 
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
-import io.neox.neonium.LittleTilesCompat;
 import io.neox.neonium.Neonium;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import net.minecraft.client.particle.Particle;
@@ -22,12 +21,6 @@ public class MixinParticleManager {
 
     @Inject(method = {"renderParticles", "renderLitParticles"}, at = @At("HEAD"))
     private void preRenderParticles(Entity entity, float partialTicks, CallbackInfo ci) {
-        // If LittleTiles is loaded, don't use our custom particle culling to avoid compatibility issues
-        if (LittleTilesCompat.isLittleTilesLoaded()) {
-            this.cullingFrustum = null;
-            return;
-        }
-        
         Frustum frustum = SodiumWorldRenderer.getInstance().getFrustum();
         boolean useCulling = Neonium.options().advanced.useParticleCulling;
 

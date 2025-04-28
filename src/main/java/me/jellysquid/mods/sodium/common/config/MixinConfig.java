@@ -77,16 +77,12 @@ public class MixinConfig {
             return false;
         }
         
-        // Expanded list of mixins to disable for better compatibility
+        // List of mixins to disable for LittleTiles compatibility
         boolean shouldDisable = 
-               // Core rendering mixins known to conflict
                mixinClassName.equals("me.jellysquid.mods.sodium.mixin.features.chunk_rendering.MixinRenderGlobal") ||
                mixinClassName.equals("me.jellysquid.mods.sodium.mixin.features.particle.cull.MixinParticleManager") ||
                mixinClassName.equals("me.jellysquid.mods.sodium.mixin.features.chunk_rendering.MixinWorldRenderer") ||
-               mixinClassName.equals("me.jellysquid.mods.sodium.mixin.features.chunk_rendering.MixinClientWorld") ||
-               mixinClassName.equals("me.jellysquid.mods.sodium.mixin.features.chunk_rendering.MixinChunkBuilder") ||
-               mixinClassName.equals("me.jellysquid.mods.sodium.mixin.features.options.MixinGameOptions") ||
-               mixinClassName.equals("me.jellysquid.mods.sodium.mixin.features.render.MixinWorldRenderer");
+               mixinClassName.equals("me.jellysquid.mods.sodium.mixin.features.chunk_rendering.MixinChunkBuilder");
         
         if (shouldDisable) {
             LOGGER.info("Disabling mixin '" + mixinClassName + "' for LittleTiles compatibility");
