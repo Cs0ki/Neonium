@@ -22,13 +22,22 @@ public class VeryEarlyModDetector {
             "com.creativemd.littletiles.LittlePatchingLoader"
     };
     
+    private static final String[] SGCRAFT_CLASS_MARKERS = {
+            "gcewing.sg.SGCraft",
+            "gcewing.sg.SGCraftClient"
+    };
+    
     private static Boolean cachedLittleTilesResult = null;
+    private static Boolean cachedSGCraftResult = null;
     
     static {
         // Initialize class markers early
         LITTLETILES_CLASS_MARKERS[0] = "com.creativemd.littletiles.LittleTiles";
         LITTLETILES_CLASS_MARKERS[1] = "com.creativemd.littletiles.LittleTilesTransformer";
         LITTLETILES_CLASS_MARKERS[2] = "com.creativemd.littletiles.LittlePatchingLoader";
+        
+        SGCRAFT_CLASS_MARKERS[0] = "gcewing.sg.SGCraft";
+        SGCRAFT_CLASS_MARKERS[1] = "gcewing.sg.SGCraftClient";
     }
     
     /**
@@ -50,6 +59,28 @@ public class VeryEarlyModDetector {
             return result;
         } catch (Throwable t) {
             System.err.println("[Neonium] Error detecting LittleTiles: " + t.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Checks if SGCraft is present.
+     * This method works the same way as the LittleTiles detection.
+     * 
+     * @return true if SGCraft is detected
+     */
+    public static boolean isSGCraftPresent() {
+        // If we already detected, return the cached result
+        if (cachedSGCraftResult != null) {
+            return cachedSGCraftResult;
+        }
+        
+        try {
+            boolean result = scanModsForSGCraft();
+            cachedSGCraftResult = result;
+            return result;
+        } catch (Throwable t) {
+            System.err.println("[Neonium] Error detecting SGCraft: " + t.getMessage());
             return false;
         }
     }
@@ -99,6 +130,50 @@ public class VeryEarlyModDetector {
     }
     
     /**
+     * Scans the mods directory for SGCraft
+     * 
+     * @return true if SGCraft is found
+     */
+    private static boolean scanModsForSGCraft() {
+        try {
+            // Look for mods directory in current directory
+            File modsDir = new File("mods");
+            if (!modsDir.exists() || !modsDir.isDirectory()) {
+                // Try minecraft directory
+                modsDir = new File(".", "mods");
+                if (!modsDir.exists() || !modsDir.isDirectory()) {
+                    // Try parent directory
+                    modsDir = new File("..", "mods");
+                    if (!modsDir.exists() || !modsDir.isDirectory()) {
+                        return false;
+                    }
+                }
+            }
+            
+            File[] files = modsDir.listFiles();
+            
+            if (files == null) {
+                return false;
+            }
+            
+            for (File file : files) {
+                if (file.isFile() && file.getName().toLowerCase().endsWith(".jar")) {
+                    boolean found = scanJarForSGCraft(file);
+                    if (found) {
+                        System.out.println("[Neonium] SGCraft detected in JAR file: " + file.getName());
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
+        } catch (Throwable t) {
+            System.err.println("[Neonium] Error scanning mods directory for SGCraft: " + t.getMessage());
+            return false;
+        }
+    }
+    
+    /**
      * Scans a JAR file for signs of LittleTiles
      * Using a non-blocking approach that only checks key markers
      * 
@@ -128,6 +203,50 @@ public class VeryEarlyModDetector {
                     if (entryName.endsWith(".class")) {
                         String className = entryName.replace('/', '.').replace(".class", "");
                         for (String marker : LITTLETILES_CLASS_MARKERS) {
+                            if (className.equals(marker)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return false;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+    
+    /**
+     * Scans a JAR file for signs of SGCraft
+     * Using a non-blocking approach that only checks key markers
+     * 
+     * @param file the JAR file to scan
+     * @return true if the JAR file appears to contain SGCraft
+     */
+    private static boolean scanJarForSGCraft(File file) {
+        try (JarFile jarFile = new JarFile(file)) {
+            // First, try to check mcmod.info
+            JarEntry mcmodInfo = jarFile.getJarEntry("mcmod.info");
+            if (mcmodInfo != null) {
+                try (InputStream is = jarFile.getInputStream(mcmodInfo)) {
+                    String mcmodContent = readStream(is);
+                    if (mcmodContent.contains("\"modid\": \"sgcraft\"") || 
+                            mcmodContent.contains("\"modid\":\"sgcraft\"")) {
+                        return true;
+                    }
+                }
+            }
+            
+            // Next, look for class files
+            Enumeration<JarEntry> entries = jarFile.entries();
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                if (!entry.isDirectory()) {
+                    String entryName = entry.getName();
+                    if (entryName.endsWith(".class")) {
+                        String className = entryName.replace('/', '.').replace(".class", "");
+                        for (String marker : SGCRAFT_CLASS_MARKERS) {
                             if (className.equals(marker)) {
                                 return true;
                             }

@@ -18,8 +18,8 @@ import java.util.Set;
 public class SodiumMixinPlugin implements IMixinConfigPlugin {
     private static final String MIXIN_PACKAGE_ROOT = "me.jellysquid.mods.sodium.mixin.";
     
-    // List of mixins to disable for LittleTiles compatibility
-    private static final String[] LITTLETILES_PROBLEM_MIXINS = {
+    // List of mixins to disable for LittleTiles and SGCraft compatibility
+    private static final String[] PROBLEM_MIXINS = {
         "me.jellysquid.mods.sodium.mixin.features.chunk_rendering.MixinRenderGlobal",
         "me.jellysquid.mods.sodium.mixin.features.particle.cull.MixinParticleManager",
         "me.jellysquid.mods.sodium.mixin.features.chunk_rendering.MixinWorldRenderer",
@@ -30,14 +30,17 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
     private SodiumConfig config;
     private boolean littleTilesLogged = false;
     private boolean littleTilesDetected = false;
+    private boolean sgcraftLogged = false;
+    private boolean sgcraftDetected = false;
 
     public SodiumMixinPlugin() {
-        // Detect LittleTiles as early as possible
-        tryDetectLittleTiles();
+        // Detect LittleTiles and SGCraft as early as possible
+        tryDetectIncompatibleMods();
     }
     
-    private void tryDetectLittleTiles() {
+    private void tryDetectIncompatibleMods() {
         try {
+            // Detect LittleTiles
             littleTilesDetected = VeryEarlyModDetector.isLittleTilesPresent();
             
             if (!littleTilesDetected) {
@@ -56,17 +59,40 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
                 }
             }
             
+            // Detect SGCraft
+            sgcraftDetected = VeryEarlyModDetector.isSGCraftPresent();
+            
+            if (!sgcraftDetected) {
+                try {
+                    Class.forName("gcewing.sg.SGCraft", false, getClass().getClassLoader());
+                    sgcraftDetected = true;
+                    System.out.println("[Neonium] SGCraft detected via direct class check in MixinPlugin!");
+                } catch (ClassNotFoundException e) {
+                    try {
+                        Class.forName("gcewing.sg.SGCraftClient", false, getClass().getClassLoader());
+                        sgcraftDetected = true;
+                        System.out.println("[Neonium] SGCraft detected via SGCraftClient class check!");
+                    } catch (ClassNotFoundException ex) {
+                        sgcraftDetected = false;
+                    }
+                }
+            }
+            
             if (littleTilesDetected) {
                 System.out.println("[Neonium] LittleTiles detected at MixinPlugin constructor time!");
             }
+            
+            if (sgcraftDetected) {
+                System.out.println("[Neonium] SGCraft detected at MixinPlugin constructor time!");
+            }
         } catch (Throwable t) {
-            System.err.println("[Neonium] Error during early LittleTiles detection: " + t.getMessage());
+            System.err.println("[Neonium] Error during early mod detection: " + t.getMessage());
         }
     }
 
     @Override
     public void onLoad(String mixinPackage) {
-        tryDetectLittleTiles();
+        tryDetectIncompatibleMods();
         
         try {
             this.config = SodiumConfig.load(new File(".").toPath().resolve("config").resolve(Neonium.MODID + "-mixins.properties").toFile());
@@ -79,6 +105,10 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
                 
         if (littleTilesDetected) {
             this.logger.info("[LittleTilesCompat] LittleTiles detected on mixin load, incompatible mixins will be disabled");
+        }
+        
+        if (sgcraftDetected) {
+            this.logger.info("[SGCraftCompat] SGCraft detected on mixin load, incompatible mixins will be disabled");
         }
     }
 
@@ -96,23 +126,36 @@ public class SodiumMixinPlugin implements IMixinConfigPlugin {
             return false;
         }
         
-        // Check if this mixin is one of the problematic ones for LittleTiles
-        if (littleTilesDetected) {
-            for (String problemMixin : LITTLETILES_PROBLEM_MIXINS) {
+        // Check if this mixin is one of the problematic ones for LittleTiles or SGCraft
+        if (littleTilesDetected || sgcraftDetected) {
+            for (String problemMixin : PROBLEM_MIXINS) {
                 if (mixinClassName.equals(problemMixin)) {
-                    if (!littleTilesLogged) {
+                    if (littleTilesDetected && !littleTilesLogged) {
                         this.logger.info("[LittleTilesCompat] LittleTiles detected, disabling incompatible mixins for compatibility");
                         littleTilesLogged = true;
                     }
-                    this.logger.info("Disabling mixin '{}' for LittleTiles compatibility", mixinClassName);
+                    
+                    if (sgcraftDetected && !sgcraftLogged) {
+                        this.logger.info("[SGCraftCompat] SGCraft detected, disabling incompatible mixins for compatibility");
+                        sgcraftLogged = true;
+                    }
+                    
+                    if (littleTilesDetected) {
+                        this.logger.info("Disabling mixin '{}' for LittleTiles compatibility", mixinClassName);
+                    }
+                    
+                    if (sgcraftDetected && !littleTilesDetected) {
+                        this.logger.info("Disabling mixin '{}' for SGCraft compatibility", mixinClassName);
+                    }
+                    
                     return false;
                 }
             }
         }
         
-        // Fall back to the regular MixinConfig if LittleTiles wasn't detected via our early methods
-        if (!littleTilesDetected && MixinConfig.shouldDisableMixin(mixinClassName)) {
-            this.logger.info("Disabling mixin '{}' for LittleTiles compatibility via MixinConfig", mixinClassName);
+        // Fall back to the regular MixinConfig if neither mod was detected via our early methods
+        if (!littleTilesDetected && !sgcraftDetected && MixinConfig.shouldDisableMixin(mixinClassName)) {
+            this.logger.info("Disabling mixin '{}' for compatibility via MixinConfig", mixinClassName);
             return false;
         }
         
